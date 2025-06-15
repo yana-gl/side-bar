@@ -4,6 +4,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import logo from '../../assets/logo.png';
 import PropTypes from 'prop-types';
 
+// todo: use them in left for toggleButton
+const openedSidebarWidth = '240px';
+const closedSidebarWidth = '72px';
+
 const routes = [
     { title: 'Home', icon: 'fas-solid fa-house', path: '/' },
     { title: 'Sales', icon: 'chart-line', path: '/sales' },
@@ -46,10 +50,12 @@ const themeStyles = {
 const SidebarWrapper = styled.div`
     position: relative;
     display: flex;
+    width: ${({ $isOpened }) => ($isOpened ? '240px' : '72px')};
 `;
 
 const SidebarContainer = styled.div`
     width: ${({ $isOpened }) => ($isOpened ? '240px' : '72px')};
+    position: relative;
     background-color: ${({ theme }) => theme.background};
     color: ${({ theme }) => theme.text};
     display: flex;
@@ -62,15 +68,16 @@ const SidebarContainer = styled.div`
     transition: width .4s ease-in-out;
     span {
         opacity: ${({ $isOpened }) => ($isOpened ? 1 : 0)};
-        transition: opacity 0.4s ease-in-out;
+        visibility: ${({ $isOpened }) => ($isOpened ? 'visible' : 'hidden')};
+        transition: opacity 0.4s ease-in-out, visibility 0.4s ease-in-out;
     }
 `;
 
 const ToggleButton = styled.div`
     position: absolute;
     top: 54px;
-    left: ${({ $isOpened }) => ($isOpened ? '224px' : '82px')};
-    background: ${({ $isOpened, theme }) => ($isOpened ? theme.hoverBg : theme.background)};
+    left: ${({ $isOpened }) => ($isOpened ? 'calc(100% - 12px)' : 'calc(100% + 12px)')};
+    background: ${({ $isOpened, theme }) => ($isOpened ? theme.activeBtn : theme.button)};
     transition: left .4s ease-in-out, background .4s ease-in-out;
     width: 24px;
     height: 24px;
@@ -124,6 +131,8 @@ const NavItem = styled.div`
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.2s;
+    color: ${({ $isActive, theme }) => $isActive ? theme.activeText : theme.text};
+    background-color: ${({ $isActive, theme }) => $isActive ? theme.activeBg : theme.background};
     &:hover {
         background-color: ${({ theme }) => theme.hoverBg};
         color: ${({ theme }) => theme.hoverText};
@@ -135,14 +144,16 @@ const NavItem = styled.div`
 
 const Sidebar = ({ color = 'light' }) => {
     const [isOpened, setIsOpened] = useState(false);
+    const [activeRoute, setActiveRoute] = useState('/');
     const theme = themeStyles[color] || themeStyles.light;
 
     const goToRoute = (path) => {
+        setActiveRoute(path);
         console.log(`going to "${path}"`);
     };
 
     return (
-        <SidebarWrapper>
+        <SidebarWrapper $isOpened={isOpened}>
             <SidebarContainer theme={theme} $isOpened={isOpened}>
                 <TopSection>
                     <LogoWrapper theme={ theme }>
@@ -155,6 +166,7 @@ const Sidebar = ({ color = 'light' }) => {
                                 key={route.title}
                                 onClick={() => goToRoute(route.path)}
                                 theme={theme}
+                                $isActive={activeRoute === route.path}
                             >
                                 <FontAwesomeIcon icon={route.icon} className='route-icon'/>
                                 <span>{route.title}</span>
@@ -168,6 +180,7 @@ const Sidebar = ({ color = 'light' }) => {
                             key={route.title}
                             onClick={() => goToRoute(route.path)}
                             theme={theme}
+                            $isActive={activeRoute === route.path}
                         >
                             <FontAwesomeIcon icon={route.icon} className="route-icon"/>
                             <span>{route.title}</span>
